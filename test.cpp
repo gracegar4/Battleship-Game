@@ -33,6 +33,7 @@ void startTests() {
     test_position();
     test_ship();
     test_player();
+    test_game();
     
     return;
 }
@@ -88,12 +89,7 @@ void test_ship() {
     cout << "\nTesting Ship: default and non-default\n";
     Ship s1;
     cout << "Default ship size: " << s1.get_size() << endl;
-    Position p1(2, 3);
-    Position p2(2, 6);
-    Position p3(2, 7);
-    Position p4(2, 2);
-    Position p5(2, 5);
-    Ship s2(p1, p2);
+    Ship s2(Position(2, 3), Position(2, 6));
     cout << "Non-Default ship size: " << s2.get_size() << endl;
     cout << "\nTesting Ship: Horizontal ship\n";
     cout << "Ship should be horizontal: " << s2.is_horizontal() << endl;
@@ -132,7 +128,7 @@ void test_ship() {
 }
 
 void test_player() {
-    cout << "\nTesting Player: add_ship, overlap, and constructors\n";
+    cout << "\nTesting Player: constructors, add_ship, and attack\n";
     Ship s30(Position(0, 7), Position(0, 4));
     Ship s31(Position(1, 5), Position(2, 5));
     Ship s32(Position(1, 5), Position(3, 5));
@@ -140,13 +136,14 @@ void test_player() {
     Player p2("Sam");
     cout << "Names should be 'Johnny and Sam' Actual: " << p1.get_name() <<
         " " << p2.get_name() << endl;
-    cout << "Initial ships should be 0 Actual: " << p1.get_num_ships() << endl;
+    cout << "Initial ships 0 Actual: " << p1.get_num_ships() << endl;
     p1.add_ship(s30);
-    cout << "Total should be 1, Actual: " << p1.get_num_ships() << endl;
+    cout << "Total 1, Actual: " << p1.get_num_ships() << endl;
     p1.add_ship(s31);
-    cout << "Total should be 2, Actual: " << p1.get_num_ships() << endl;
+    cout << "Total 2, Actual: " << p1.get_num_ships() << endl;
     p1.add_ship(s32);
-    cout << "Overlap occuring, should be 2, Actual: " << p1.get_num_ships() << endl;
+    cout << "Overlap occuring, 2, Actual: " << p1.get_num_ships() << endl;
+    
     p1.print_grid();
     Ship s33(Position(1, 7), Position(1, 4));
     Ship s34(Position(1, 3), Position(1, 5));
@@ -154,37 +151,74 @@ void test_player() {
     Ship s36(Position(3, 0), Position(4, 0));
     Ship s37(Position(0, 0), Position(0, 2));
     Ship s38(Position(7, 7), Position(7, 5));
+    Ship s42(Position(7, 6), Position(7, 1));
     Ship s39(Position(5, 3), Position(5, 4));
+    Ship s43(Position(-1, -1), Position(-1, -2));
     p2.add_ship(s33);
-    cout << "Total should be 1, Actual: " << p2.get_num_ships() << endl;
+    cout << "Total 1, Actual: " << p2.get_num_ships() << endl;
     p2.add_ship(s34);
-    cout << "Overlap occuring, should be 1, Actual: " << p2.get_num_ships() << endl;
+    cout << "Total 1, Actual: " << p2.get_num_ships() << endl;
     p2.add_ship(s35);
     p2.add_ship(s36);
     p2.add_ship(s37);
+    p2.add_ship(s42);
+    cout <<"Ship too big, total is 4, Actual: " << p2.get_num_ships() << endl;
+    p2.add_ship(s43);
+    cout <<"Ship is invalid, total is 4, Actual: " << p2.get_num_ships() << endl;
     p2.add_ship(s38);
     p2.add_ship(s39);
     p2.print_grid();
     cout << "\nTesting Player: Hit or miss\n";
-    p2.attack(p2, Position(3, 0));
+    p1.attack(p2, Position(3, 0));
     cout << "Should be a hit" << endl;
-    p2.attack(p2, Position(3, 0));
+    p1.attack(p2, Position(3, 0));
     cout << "Should be a miss" << endl;
-    p2.attack(p2, Position(4, 0));
+    p1.attack(p2, Position(4, 0));
     cout << "Should be a hit and sunk" << endl;
-    p2.attack(p2, Position(0, 7));
+    p1.attack(p2, Position(0, 7));
+    cout << "Should be a miss" << endl;
+    p1.attack(p2, Position(0, 7));
     cout << "Should be a miss" << endl;
     p2.print_grid();
-    p2.load_grid_file("grid1.txt");
     Player p3;
     Ship s40;
+    Player p4;
+    Player p5;
     cout << "should all be default: " << p3.get_name() << " " << p3.get_num_ships()
         << " " << p3.get_remaining_ships() << endl;
     p3.print_grid();
-    p3.load_grid_file("grid1.txt");
-    p3.load_grid_file("grid.txt");
-    p3.print_grid();
+    cout << "Testing load_grid_file default 1" << endl;
+    p4.load_grid_file("grid1.txt");
+    p4.print_grid();
+    cout << "Testing load_grid_file default 2" << endl;
+    p5.load_grid_file("grid2.txt");
+    p5.print_grid();
     return;
+}
+
+void test_game() {
+    cout << "\nTesting: Valid move, getters, and game non-default constructor\n";
+    Game game;
+    cout << "Expected '  you entered an invalid input', Actual: "
+        << game.check_valid_move("A") << endl;
+    cout << "Expected 1, Actual: " << game.check_valid_move("1A") << endl;
+    cout << "Expected 1, Actual: " << game.check_valid_move("1a") << endl;
+    cout << "Expected '  you entered an invalid input', Actual: "
+        << game.check_valid_move("8i") << endl;
+    cout << "Testing Getters" << endl;
+    Player p1 = game.get_p1();
+    Player p2 = game.get_p2();
+    cout << "Expected '', Actual: " << p1.get_name() << endl;
+    cout << "Expected '', Actual: " << p2.get_name() << endl;
+    Player player1("Avery");
+    Player player2("Grace");
+    Game game2(player1, "testgrid.txt", player2, "testgrid.txt");
+    Player p3 = game2.get_p1();
+    Player p4 = game2.get_p2();
+    cout << "Expected 'Avery', Actual: " << p3.get_name() << endl;
+    p3.print_grid();
+    cout << "Expected 'Grace', Actual: " << p4.get_name() << endl;
+    p4.print_grid();
 }
 
 void test_project_setup() {

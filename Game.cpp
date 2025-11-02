@@ -26,20 +26,22 @@ Game::Game() {
 Game::Game(Player player1, string grid1, Player player2, string grid2) {
     p1 = player1;
     p2 = player2;
-    bool loadedGrid1 = false;
-    bool loadedGrid2 = false;
+    bool loaded_grid1 = false;
+    bool loaded_grid2 = false;
     
     if (grid1 != "") {
-        loadedGrid1 = p1.load_grid_file(grid1);
+        loaded_grid1 = p1.load_grid_file(grid1);
     }
-    if (!loadedGrid1) {
+    if (!loaded_grid1) {
         cout << "Generating random grid for " << p1.get_name();
+        generate_random_grid(p1);
     }
     if (grid2 != "") {
-        loadedGrid2 = p2.load_grid_file(grid2);
+        loaded_grid2 = p2.load_grid_file(grid2);
     }
-    if (!loadedGrid2) {
+    if (!loaded_grid2) {
         cout << "Generating random grid for " << p2.get_name();
+        generate_random_grid(p2);
     }
 }
 
@@ -52,7 +54,7 @@ Player Game::get_p2() {
 }
 
 string Game::get_move(string player_name) {
-    cout << player_name << " enter your move :";
+    cout << player_name << " enter your move: ";
     string move;
     cin >> move;
     return move;
@@ -60,26 +62,75 @@ string Game::get_move(string player_name) {
 
 bool Game::check_valid_move(string move) {
     if (move.length() != 2) {
-        //Move length must be 2 characters long
-        cout << p1.get_name() << " you entered an invalid input" << endl;
+        cout << endl << p1.get_name() << " you entered an invalid input" << endl;
         return false;
     }
     char row_val = move[0];
     char col_val = toupper(move[1]);
     if (row_val < '1' || row_val > '8' || col_val < 'A' || col_val > 'H') {
         //Checking for valid input between grid (1-8) and (A-H)
-        cout << p1.get_name() << " you entered an invalid input" << endl;
+        cout << endl << p1.get_name() << " you entered an invalid position" << endl;
         return false;
     }
     return true;
 }
 
 void Game::start(char difficulty, int max_num_rounds) {
-    // TODO: write implementation here.
-    string winner_name = "";
-    if (max_num_rounds == MAX_ROUNDS) {
-        cout << "Game over, winner is " << winner_name << " in " << endl;
+    int round = 0;
+    bool game_over = false;
+
+    while (!game_over && round < max_num_rounds) {
+        round++;
+
+        string move;
+        bool valid_move = false;
+
+        while (!valid_move) {
+            move = get_move(p1.get_name());
+            valid_move = check_valid_move(move);
+        }
+
+        int row = move[0] - '1';
+        int col = toupper(move[1]) - 'A';
+        Position pos(row, col);
+
+        p1.attack(p2, pos);
+
+        if (p2.destroyed()) {
+            cout << endl << "Your grid" << endl << endl;
+            p1.print_grid();
+            cout << p2.get_name() << "'s grid" << endl;
+            p1.print_guess_grid();
+            cout << "Game over, winner is " << p1.get_name()
+                << " in " << round << " rounds" << endl;
+            game_over = true;
+            break;
+        }
+        
+        opponent_make_move(difficulty);
+
+        if (p1.destroyed()) {
+            cout << "Your grid" << endl;
+            p1.print_grid();
+            cout << p2.get_name() << "'s grid" << endl;
+            p1.print_guess_grid();
+            cout << "Game over, winner is " << p2.get_name()
+                << " in " << round << " rounds" << endl;
+            game_over = true;
+            break;
+        }
+
+        cout << endl << "Your grid" << endl << endl;
+        p1.print_grid();
+        cout << p2.get_name() << "'s grid" << endl << endl;
+        p1.print_guess_grid();
+        }
+
+    if (!game_over) {
+        cout << endl << "Game over, maximum rounds (" << max_num_rounds
+            << ") reached." << endl;
     }
+
 }
 
 // Your code goes above this line.

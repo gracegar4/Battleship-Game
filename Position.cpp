@@ -90,9 +90,9 @@ void Position::read(istream& is) {
         is.clear();
         is >> trash >> row_in >> trash >> col_in >> trash;
     }
-
+    
     row = check_range(row_in - 1);
-    col = check_range(static_cast<char>(toupper(col_in)) - 'A');
+    col = check_range(toupper(col_in) - 'A');
     return;
 }
 
